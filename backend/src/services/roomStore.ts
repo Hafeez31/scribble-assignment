@@ -103,6 +103,7 @@ export function startRoom(code: string): Room | null {
   }
 
   room.drawerId = room.hostId;
+  room.secretWord = STARTER_WORDS[Math.floor(Math.random() * STARTER_WORDS.length)];
   room.status = "in-progress";
   room.updatedAt = now();
   rooms.set(room.code, room);
