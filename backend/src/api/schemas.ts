@@ -28,6 +28,10 @@ export const submitGuessSchema = z.object({
   text: z.string().trim().min(1).max(100)
 });
 
+export const restartRoomSchema = z.object({
+  participantId: z.string()
+});
+
 export const roomCodeParamsSchema = z.object({
   code: z.string()
 });

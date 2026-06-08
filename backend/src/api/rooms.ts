@@ -5,6 +5,7 @@ import {
   createRoomSchema,
   HttpError,
   joinRoomSchema,
+  restartRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
   startRoomSchema,
@@ -16,6 +17,7 @@ import {
   createRoom,
   getRoom,
   joinRoom,
+  restartRoom,
   startRoom,
   submitGuess,
   toRoomSnapshot
@@ -181,6 +183,37 @@ export function createRoomsRouter() {
       }
 
       response.json({ correct: result.correct });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/restart", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = restartRoomSchema.parse(request.body);
+      const upperCode = code.toUpperCase();
+      const room = getRoom(upperCode);
+
+      if (!room) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      if (room.status !== "round-ended") {
+        throw new HttpError(409, "Room is not in round-ended state");
+      }
+
+      if (room.hostId !== participantId) {
+        throw new HttpError(403, "Only the host can restart");
+      }
+
+      const restartedRoom = restartRoom(upperCode);
+
+      if (!restartedRoom) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      response.json({ room: toRoomSnapshot(restartedRoom) });
     } catch (error) {
       next(error);
     }

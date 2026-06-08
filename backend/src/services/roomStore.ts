@@ -176,14 +176,34 @@ export function submitGuess(
   return { correct };
 }
 
+export function restartRoom(code: string): Room | null {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return null;
+  }
+
+  room.status = "lobby";
+  room.strokes = [];
+  room.guesses = [];
+  room.scores = {};
+  room.drawerId = null;
+  room.secretWord = null;
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return cloneRoom(room);
+}
+
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
+  const isRoundEnded = room.status === "round-ended";
   const isDrawer = viewerParticipantId !== undefined && viewerParticipantId === room.drawerId;
   return {
     code: room.code,
     hostId: room.hostId,
     drawerId: room.drawerId,
-    secretWord: isDrawer ? room.secretWord : null,
-    wordLength: !isDrawer && room.secretWord !== null ? room.secretWord.length : null,
+    secretWord: isRoundEnded || isDrawer ? room.secretWord : null,
+    wordLength: !isRoundEnded && !isDrawer && room.secretWord !== null ? room.secretWord.length : null,
     strokes: room.strokes.map((s: Stroke) => ({ points: [...s.points] })),
     guesses: room.guesses.map((g: Guess) => ({ ...g })),
     scores: { ...room.scores },
