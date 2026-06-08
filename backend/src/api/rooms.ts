@@ -56,6 +56,41 @@ export function createRoomsRouter() {
     }
   });
 
+  router.post("/:code/start", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = startRoomSchema.parse(request.body);
+      const upperCode = code.toUpperCase();
+      const room = getRoom(upperCode);
+
+      if (!room) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      if (room.status === "in-progress") {
+        throw new HttpError(409, "Game already in progress");
+      }
+
+      if (room.hostId !== participantId) {
+        throw new HttpError(403, "Only the host can start the game");
+      }
+
+      if (room.participants.length < 2) {
+        throw new HttpError(409, "At least 2 players are required to start");
+      }
+
+      const snapshot = startRoom(upperCode);
+
+      if (!snapshot) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      response.json({ room: snapshot });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.get("/:code", (request, response, next) => {
     try {
       const { code } = roomCodeParamsSchema.parse(request.params);

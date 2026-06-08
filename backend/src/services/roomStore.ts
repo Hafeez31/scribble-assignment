@@ -93,6 +93,20 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
+export function startRoom(code: string): RoomSnapshot | null {
+  const room = rooms.get(code);
+
+  if (!room) {
+    return null;
+  }
+
+  room.status = "in-progress";
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return toRoomSnapshot(cloneRoom(room));
+}
+
 export function toRoomSnapshot(room: Room): RoomSnapshot {
   return {
     code: room.code,
