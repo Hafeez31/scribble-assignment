@@ -69,7 +69,7 @@ export function ResultsPage() {
   const winner = room.participants.find((p) => (room.scores[p.id] ?? 0) === 100);
 
   return (
-    <section className="panel">
+    <section className="panel game-page">
       <div className="game-page__header">
         <div className="game-page__header-left">
           <span className="section-kicker">Round Over</span>
