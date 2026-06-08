@@ -29,7 +29,7 @@ description: "Task list for Room Setup & Lobby"
 
 **Purpose**: Fix the blocking API bug so all subsequent work is testable end-to-end.
 
-- [ ] T001 Fix `API_BASE_URL` fallback in `frontend/src/services/api.ts` — change `"http://localhost:3001/bug"` to `"http://localhost:3001"`
+- [x] T001 Fix `API_BASE_URL` fallback in `frontend/src/services/api.ts` — change `"http://localhost:3001/bug"` to `"http://localhost:3001"`
 
 ---
 
@@ -39,9 +39,9 @@ description: "Task list for Room Setup & Lobby"
 
 **⚠️ CRITICAL**: All three tasks can run in parallel. No user story work begins until this phase is complete.
 
-- [ ] T002 [P] Expand `RoomStatus` to `"lobby" | "in-progress"` and add `hostId: string` to `Room` and `RoomSnapshot` interfaces in `backend/src/models/game.ts`
-- [ ] T003 [P] Mirror model changes in `frontend/src/services/api.ts` — add `hostId: string` to `RoomSnapshot` and expand `status` type to `"lobby" | "in-progress"`
-- [ ] T004 [P] Update `createRoomSchema` and `joinRoomSchema` in `backend/src/api/schemas.ts` — replace `z.string().optional()` with `z.string().trim().min(1).max(30)` for `playerName`; add `startRoomSchema = z.object({ participantId: z.string() })`
+- [x] T002 [P] Expand `RoomStatus` to `"lobby" | "in-progress"` and add `hostId: string` to `Room` and `RoomSnapshot` interfaces in `backend/src/models/game.ts`
+- [x] T003 [P] Mirror model changes in `frontend/src/services/api.ts` — add `hostId: string` to `RoomSnapshot` and expand `status` type to `"lobby" | "in-progress"`
+- [x] T004 [P] Update `createRoomSchema` and `joinRoomSchema` in `backend/src/api/schemas.ts` — replace `z.string().optional()` with `z.string().trim().min(1).max(30)` for `playerName`; add `startRoomSchema = z.object({ participantId: z.string() })`
 
 **Checkpoint**: Types and schemas updated — user story implementation can now begin.
 
@@ -55,9 +55,9 @@ description: "Task list for Room Setup & Lobby"
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Update `createRoom()` in `backend/src/services/roomStore.ts` — remove `displayName()` fallback (name now guaranteed by Zod), set `room.hostId = participant.id`
-- [ ] T006 [US1] Update `toRoomSnapshot()` in `backend/src/services/roomStore.ts` — include `hostId: room.hostId` in the returned `RoomSnapshot` object
-- [ ] T007 [US1] Add client-side name validation to `frontend/src/pages/CreateRoomPage.tsx` — trim input, block submission if empty or > 30 chars, show inline error "Name is required" / "Name must be 30 characters or fewer"
+- [x] T005 [US1] Update `createRoom()` in `backend/src/services/roomStore.ts` — remove `displayName()` fallback (name now guaranteed by Zod), set `room.hostId = participant.id`
+- [x] T006 [US1] Update `toRoomSnapshot()` in `backend/src/services/roomStore.ts` — include `hostId: room.hostId` in the returned `RoomSnapshot` object
+- [x] T007 [US1] Add client-side name validation to `frontend/src/pages/CreateRoomPage.tsx` — trim input, block submission if empty or > 30 chars, show inline error "Name is required" / "Name must be 30 characters or fewer"
 
 **Checkpoint**: User Story 1 fully functional — room creation, host assignment, and name validation all work independently.
 
@@ -71,9 +71,9 @@ description: "Task list for Room Setup & Lobby"
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Update `joinRoom()` in `backend/src/services/roomStore.ts` — add guard: if `room.status === "in-progress"` throw `new HttpError(409, "Game already in progress")` before adding participant
-- [ ] T009 [US2] Update `POST /:code/join` handler in `backend/src/api/rooms.ts` — update not-found message from `"Unable to join room"` to `"Room not found"`; ensure `HttpError` from `joinRoom` propagates via `next(error)`
-- [ ] T010 [US2] Add client-side validation to `frontend/src/pages/JoinRoomPage.tsx` — trim both name and code fields; block submission with per-field inline errors: "Name is required" / "Name must be 30 characters or fewer" / "Room code is required"
+- [x] T008 [US2] Update `joinRoom()` in `backend/src/services/roomStore.ts` — add guard: if `room.status === "in-progress"` throw `new HttpError(409, "Game already in progress")` before adding participant
+- [x] T009 [US2] Update `POST /:code/join` handler in `backend/src/api/rooms.ts` — update not-found message from `"Unable to join room"` to `"Room not found"`; ensure `HttpError` from `joinRoom` propagates via `next(error)`
+- [x] T010 [US2] Add client-side validation to `frontend/src/pages/JoinRoomPage.tsx` — trim both name and code fields; block submission with per-field inline errors: "Name is required" / "Name must be 30 characters or fewer" / "Room code is required"
 
 **Checkpoint**: User Stories 1 and 2 both independently testable — full create and join flows validated.
 
@@ -87,10 +87,10 @@ description: "Task list for Room Setup & Lobby"
 
 ### Implementation for User Story 3
 
-- [ ] T011 [P] [US3] Add `startGame(code: string, participantId: string)` method to `frontend/src/services/api.ts` — `POST /rooms/${code}/start` with body `{ participantId }`; return type `{ room: RoomSnapshot }`
-- [ ] T012 [P] [US3] Add `async startGame()` method to `frontend/src/state/roomStore.ts` — calls `api.startGame(room.code, participantId)` inside `withLoading()`, calls `setRoomSnapshot(response.room)` on success
-- [ ] T013 [US3] Replace manual refresh with auto-polling in `frontend/src/pages/LobbyPage.tsx` — add `useEffect` with `setInterval` at 2000 ms calling `roomStore.fetchRoom()`; clear interval on unmount; remove the manual "Refresh Room" button and `handleRefresh` handler
-- [ ] T014 [US3] Handle poll results in `frontend/src/pages/LobbyPage.tsx` — if fetched `room.status === "in-progress"` call `navigate("/game")`; if fetch throws with "not found" message call `navigate("/")` to signal room closed (depends on T013)
+- [x] T011 [P] [US3] Add `startGame(code: string, participantId: string)` method to `frontend/src/services/api.ts` — `POST /rooms/${code}/start` with body `{ participantId }`; return type `{ room: RoomSnapshot }`
+- [x] T012 [P] [US3] Add `async startGame()` method to `frontend/src/state/roomStore.ts` — calls `api.startGame(room.code, participantId)` inside `withLoading()`, calls `setRoomSnapshot(response.room)` on success
+- [x] T013 [US3] Replace manual refresh with auto-polling in `frontend/src/pages/LobbyPage.tsx` — add `useEffect` with `setInterval` at 2000 ms calling `roomStore.fetchRoom()`; clear interval on unmount; remove the manual "Refresh Room" button and `handleRefresh` handler
+- [x] T014 [US3] Handle poll results in `frontend/src/pages/LobbyPage.tsx` — if fetched `room.status === "in-progress"` call `navigate("/game")`; if fetch throws with "not found" message call `navigate("/")` to signal room closed (depends on T013)
 
 **Checkpoint**: Lobby auto-refreshes every 2 s and navigates all players to the game page when status changes.
 
@@ -104,9 +104,9 @@ description: "Task list for Room Setup & Lobby"
 
 ### Implementation for User Story 4
 
-- [ ] T015 [US4] Implement `startRoom(code: string, participantId: string)` in `backend/src/services/roomStore.ts` — return `HttpError(404)` if room not found; `HttpError(403, "Only the host can start the game")` if `participantId !== room.hostId`; `HttpError(409, "Game already in progress")` if `status === "in-progress"`; `HttpError(409, "At least 2 players are required to start")` if `participants.length < 2`; otherwise set `room.status = "in-progress"`, save, and return `{ room: toRoomSnapshot(room) }`
-- [ ] T016 [US4] Add `POST /:code/start` route handler in `backend/src/api/rooms.ts` — parse `startRoomSchema`, call `startRoom(code.toUpperCase(), participantId)`, return `200 { room }` on success; errors propagate via `next(error)`
-- [ ] T017 [US4] Add host-only "Start Game" UI to `frontend/src/pages/LobbyPage.tsx` — derive `isHost = room.hostId === participantId`; render "Start Game" button only when `isHost`; disable with label "Need at least 2 players" when `room.participants.length < 2`; on click call `roomStore.startGame()` then `navigate("/game")`; non-host sees "Waiting for host to start…" in the status card
+- [x] T015 [US4] Implement `startRoom(code: string, participantId: string)` in `backend/src/services/roomStore.ts` — return `HttpError(404)` if room not found; `HttpError(403, "Only the host can start the game")` if `participantId !== room.hostId`; `HttpError(409, "Game already in progress")` if `status === "in-progress"`; `HttpError(409, "At least 2 players are required to start")` if `participants.length < 2`; otherwise set `room.status = "in-progress"`, save, and return `{ room: toRoomSnapshot(room) }`
+- [x] T016 [US4] Add `POST /:code/start` route handler in `backend/src/api/rooms.ts` — parse `startRoomSchema`, call `startRoom(code.toUpperCase(), participantId)`, return `200 { room }` on success; errors propagate via `next(error)`
+- [x] T017 [US4] Add host-only "Start Game" UI to `frontend/src/pages/LobbyPage.tsx` — derive `isHost = room.hostId === participantId`; render "Start Game" button only when `isHost`; disable with label "Need at least 2 players" when `room.participants.length < 2`; on click call `roomStore.startGame()` then `navigate("/game")`; non-host sees "Waiting for host to start…" in the status card
 
 **Checkpoint**: All four user stories independently functional. Full feature complete.
 
@@ -116,8 +116,8 @@ description: "Task list for Room Setup & Lobby"
 
 **Purpose**: Verify the complete feature against the quickstart scenarios.
 
-- [ ] T018 [P] Run backend tests: `cd backend && npm test` — confirm all existing tests pass with the model and schema changes
-- [ ] T019 [P] Run frontend tests: `cd frontend && npm test` — confirm all existing tests pass
+- [x] T018 [P] Run backend tests: `cd backend && npm test` — confirm all existing tests pass with the model and schema changes
+- [x] T019 [P] Run frontend tests: `cd frontend && npm test` — confirm all existing tests pass
 
 ---
 
