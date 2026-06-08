@@ -95,24 +95,29 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
-export function startRoom(code: string): RoomSnapshot | null {
+export function startRoom(code: string): Room | null {
   const room = rooms.get(code);
 
   if (!room) {
     return null;
   }
 
+  room.drawerId = room.hostId;
   room.status = "in-progress";
   room.updatedAt = now();
   rooms.set(room.code, room);
 
-  return toRoomSnapshot(cloneRoom(room));
+  return cloneRoom(room);
 }
 
-export function toRoomSnapshot(room: Room): RoomSnapshot {
+export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
+  const isDrawer = viewerParticipantId !== undefined && viewerParticipantId === room.drawerId;
   return {
     code: room.code,
     hostId: room.hostId,
+    drawerId: room.drawerId,
+    secretWord: isDrawer ? room.secretWord : null,
+    wordLength: !isDrawer && room.secretWord !== null ? room.secretWord.length : null,
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
     availableWords: listWords(),

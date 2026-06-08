@@ -79,13 +79,13 @@ export function createRoomsRouter() {
         throw new HttpError(409, "At least 2 players are required to start");
       }
 
-      const snapshot = startRoom(upperCode);
+      const startedRoom = startRoom(upperCode);
 
-      if (!snapshot) {
+      if (!startedRoom) {
         throw new HttpError(404, "Room not found");
       }
 
-      response.json({ room: snapshot });
+      response.json({ room: toRoomSnapshot(startedRoom, participantId) });
     } catch (error) {
       next(error);
     }
@@ -102,7 +102,7 @@ export function createRoomsRouter() {
       }
 
       response.json({
-        room: toRoomSnapshot(room)
+        room: toRoomSnapshot(room, participantId)
       });
     } catch (error) {
       next(error);
