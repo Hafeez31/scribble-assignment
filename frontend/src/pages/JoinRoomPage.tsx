@@ -6,6 +6,8 @@ import { useRoomStore } from "../state/roomStore";
 export function JoinRoomPage() {
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const roomStore = useRoomStore();
@@ -13,9 +15,31 @@ export function JoinRoomPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const trimmedName = playerName.trim();
+    const trimmedCode = roomCode.trim();
+    let valid = true;
+
+    setNameError(null);
+    setCodeError(null);
+    setError(null);
+
+    if (trimmedName.length === 0) {
+      setNameError("Name is required");
+      valid = false;
+    } else if (trimmedName.length > 30) {
+      setNameError("Name must be 30 characters or fewer");
+      valid = false;
+    }
+
+    if (trimmedCode.length === 0) {
+      setCodeError("Room code is required");
+      valid = false;
+    }
+
+    if (!valid) return;
+
     try {
-      setError(null);
-      await roomStore.joinRoom(roomCode.toUpperCase(), playerName);
+      await roomStore.joinRoom(trimmedCode.toUpperCase(), trimmedName);
       navigate("/lobby");
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Unable to join room");
@@ -38,6 +62,7 @@ export function JoinRoomPage() {
             onChange={(event) => setPlayerName(event.target.value)}
             placeholder="Second pencil"
           />
+          {nameError ? <p className="form__error">{nameError}</p> : null}
         </label>
 
         <label className="form__field">
@@ -48,6 +73,7 @@ export function JoinRoomPage() {
             onChange={(event) => setRoomCode(event.target.value.toUpperCase())}
             placeholder="ABCD"
           />
+          {codeError ? <p className="form__error">{codeError}</p> : null}
         </label>
         {error ? <p className="form__error">{error}</p> : null}
         <div className="button-row">

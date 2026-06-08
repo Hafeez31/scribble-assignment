@@ -30,10 +30,21 @@ export function createRoomsRouter() {
     try {
       const { code } = roomCodeParamsSchema.parse(request.params);
       const { playerName } = joinRoomSchema.parse(request.body);
-      const result = joinRoom(code.toUpperCase(), playerName);
+      const upperCode = code.toUpperCase();
+      const existing = getRoom(upperCode);
+
+      if (!existing) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      if (existing.status === "in-progress") {
+        throw new HttpError(409, "Game already in progress");
+      }
+
+      const result = joinRoom(upperCode, playerName);
 
       if (!result) {
-        throw new HttpError(404, "Unable to join room");
+        throw new HttpError(404, "Room not found");
       }
 
       response.json({
