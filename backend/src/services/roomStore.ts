@@ -29,14 +29,10 @@ function generateUniqueCode() {
   return code;
 }
 
-function displayName(name?: string) {
-  return name || "Player";
-}
-
-function createParticipant(name?: string): Participant {
+function createParticipant(name: string): Participant {
   return {
     id: randomUUID(),
-    name: displayName(name),
+    name,
     joinedAt: now()
   };
 }
@@ -49,10 +45,11 @@ export function listWords() {
   return [...STARTER_WORDS];
 }
 
-export function createRoom(playerName?: string) {
+export function createRoom(playerName: string) {
   const participant = createParticipant(playerName);
   const room: Room = {
     code: generateUniqueCode(),
+    hostId: participant.id,
     status: "lobby",
     participants: [participant],
     createdAt: now(),
@@ -67,7 +64,7 @@ export function createRoom(playerName?: string) {
   };
 }
 
-export function joinRoom(code: string, playerName?: string) {
+export function joinRoom(code: string, playerName: string) {
   const room = rooms.get(code);
 
   if (!room) {
@@ -96,11 +93,10 @@ export function saveRoom(room: Room) {
   return getRoom(room.code);
 }
 
-export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
-  void viewerParticipantId;
-
+export function toRoomSnapshot(room: Room): RoomSnapshot {
   return {
     code: room.code,
+    hostId: room.hostId,
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
     availableWords: listWords(),
