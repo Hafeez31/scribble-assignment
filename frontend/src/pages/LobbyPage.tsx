@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { PageHeader } from "../components/PageHeader";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { useRoomState, useRoomStore } from "../state/roomStore";
 
+const POLL_INTERVAL_MS = 2000;
+
 export function LobbyPage() {
   const navigate = useNavigate();
   const roomStore = useRoomStore();
-  const { room, error, isLoading } = useRoomState();
-  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const { room, participantId, error, isLoading } = useRoomState();
+  const navigatingRef = useRef(false);
 
   useEffect(() => {
     if (!room) {
@@ -17,17 +19,46 @@ export function LobbyPage() {
     }
   }, [navigate, room]);
 
-  async function handleRefresh() {
-    try {
-      setRefreshError(null);
-      await roomStore.fetchRoom();
-    } catch (caughtError) {
-      setRefreshError(caughtError instanceof Error ? caughtError.message : "Unable to refresh room");
-    }
-  }
+  useEffect(() => {
+    if (!room) return;
+
+    const poll = async () => {
+      if (navigatingRef.current) return;
+
+      try {
+        const updated = await roomStore.fetchRoom();
+
+        if (updated?.status === "in-progress") {
+          navigatingRef.current = true;
+          navigate("/game", { replace: true });
+        }
+      } catch (caughtError) {
+        const message = caughtError instanceof Error ? caughtError.message : "";
+        if (message.toLowerCase().includes("not found") || message.toLowerCase().includes("load room")) {
+          navigatingRef.current = true;
+          navigate("/", { replace: true });
+        }
+      }
+    };
+
+    const id = setInterval(poll, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [navigate, room, roomStore]);
 
   if (!room) {
     return null;
+  }
+
+  const isHost = room.hostId === participantId;
+  const canStart = room.participants.length >= 2;
+
+  async function handleStartGame() {
+    try {
+      await roomStore.startGame();
+      navigate("/game", { replace: true });
+    } catch (caughtError) {
+      // error is set in store by withLoading
+    }
   }
 
   return (
@@ -50,7 +81,9 @@ export function LobbyPage() {
               {room.participants.map((participant) => (
                 <li key={participant.id}>
                   <span>{participant.name}</span>
-                  <span className="player-list__meta">joined</span>
+                  <span className="player-list__meta">
+                    {participant.id === room.hostId ? "host" : "joined"}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -58,21 +91,27 @@ export function LobbyPage() {
         </Card>
 
         <Card title="Status">
-          <p className="status-line" style={{ backgroundColor: isLoading ? '#fef3c7' : '#e0e7ff', color: isLoading ? '#b45309' : '#3730a3' }}>
-            {isLoading ? "Refreshing players..." : "Ready to play"}
+          <p className="status-line" style={{ backgroundColor: isLoading ? "#fef3c7" : "#e0e7ff", color: isLoading ? "#b45309" : "#3730a3" }}>
+            {isLoading ? "Updating..." : "Ready to play"}
           </p>
-          <p style={{ marginTop: '8px' }}>{error ?? refreshError ?? "Waiting for the host to start the game."}</p>
+          <p style={{ marginTop: "8px" }}>
+            {error ?? (isHost ? "You are the host." : "Waiting for the host to start the game.")}
+          </p>
         </Card>
       </div>
 
-      <div className="button-row button-row--spread">
-        <button className="button button--secondary" disabled={isLoading} onClick={handleRefresh}>
-          {isLoading ? "Refreshing..." : "Refresh Room"}
-        </button>
-        <button className="button button--primary" onClick={() => navigate("/game")}>
-          Start Game
-        </button>
-      </div>
+      {isHost && (
+        <div className="button-row button-row--spread">
+          <button
+            className="button button--primary"
+            disabled={!canStart || isLoading}
+            onClick={handleStartGame}
+            title={canStart ? undefined : "Need at least 2 players"}
+          >
+            {canStart ? "Start Game" : "Need at least 2 players"}
+          </button>
+        </div>
+      )}
     </section>
   );
 }
