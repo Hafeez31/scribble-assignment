@@ -31,9 +31,9 @@ description: "Task list for Game Start & Drawer Flow"
 
 **⚠️ CRITICAL**: Complete this phase before any user story work begins.
 
-- [ ] T001 [P] Add `drawerId: string | null` and `secretWord: string | null` to `Room` interface, and add `drawerId: string | null`, `secretWord: string | null`, and `wordLength: number | null` to `RoomSnapshot` interface in `backend/src/models/game.ts`
-- [ ] T002 [P] Mirror new `RoomSnapshot` fields in `frontend/src/services/api.ts` — add `drawerId: string | null`, `secretWord: string | null`, and `wordLength: number | null` to the `RoomSnapshot` interface
-- [ ] T003 [P] Initialize new fields in `createRoom()` in `backend/src/services/roomStore.ts` — set `drawerId: null` and `secretWord: null` on the newly created `Room` object
+- [x] T001 [P] Add `drawerId: string | null` and `secretWord: string | null` to `Room` interface, and add `drawerId: string | null`, `secretWord: string | null`, and `wordLength: number | null` to `RoomSnapshot` interface in `backend/src/models/game.ts`
+- [x] T002 [P] Mirror new `RoomSnapshot` fields in `frontend/src/services/api.ts` — add `drawerId: string | null`, `secretWord: string | null`, and `wordLength: number | null` to the `RoomSnapshot` interface
+- [x] T003 [P] Initialize new fields in `createRoom()` in `backend/src/services/roomStore.ts` — set `drawerId: null` and `secretWord: null` on the newly created `Room` object
 
 **Checkpoint**: Types compile, existing tests still pass, new fields appear as `null` in all current API responses.
 
@@ -47,11 +47,11 @@ description: "Task list for Game Start & Drawer Flow"
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Update `startRoom(code: string)` return type in `backend/src/services/roomStore.ts` — change from `RoomSnapshot | null` to `Room | null`; inside the function set `room.drawerId = room.hostId` before saving; remove the `toRoomSnapshot()` call from inside `startRoom()`
-- [ ] T005 [US1] Update `toRoomSnapshot(room: Room)` signature in `backend/src/services/roomStore.ts` to `toRoomSnapshot(room: Room, viewerParticipantId?: string)` — add `drawerId: room.drawerId` to the returned object; `secretWord` and `wordLength` can stay `null` for now (word logic added in US2)
-- [ ] T006 [US1] Update `POST /:code/start` handler in `backend/src/api/rooms.ts` — after calling `startRoom(upperCode)` which now returns `Room | null`, call `toRoomSnapshot(room, participantId)` to build the response; pass `participantId` from the validated request body
-- [ ] T007 [US1] Update `GET /:code` handler in `backend/src/api/rooms.ts` — pass `participantId` (already parsed from query via `roomViewerQuerySchema`) as the second argument to `toRoomSnapshot(room, participantId)`
-- [ ] T008 [P] [US1] Update `frontend/src/pages/GamePage.tsx` — derive `isDrawer = room.drawerId === participantId`; add a "Now drawing" section visible to all players that displays the drawer's name (look up name from `room.participants` using `room.drawerId`); add "You are the drawer" label when `isDrawer` is true
+- [x] T004 [US1] Update `startRoom(code: string)` return type in `backend/src/services/roomStore.ts` — change from `RoomSnapshot | null` to `Room | null`; inside the function set `room.drawerId = room.hostId` before saving; remove the `toRoomSnapshot()` call from inside `startRoom()`
+- [x] T005 [US1] Update `toRoomSnapshot(room: Room)` signature in `backend/src/services/roomStore.ts` to `toRoomSnapshot(room: Room, viewerParticipantId?: string)` — add `drawerId: room.drawerId` to the returned object; `secretWord` and `wordLength` can stay `null` for now (word logic added in US2)
+- [x] T006 [US1] Update `POST /:code/start` handler in `backend/src/api/rooms.ts` — after calling `startRoom(upperCode)` which now returns `Room | null`, call `toRoomSnapshot(room, participantId)` to build the response; pass `participantId` from the validated request body
+- [x] T007 [US1] Update `GET /:code` handler in `backend/src/api/rooms.ts` — pass `participantId` (already parsed from query via `roomViewerQuerySchema`) as the second argument to `toRoomSnapshot(room, participantId)`
+- [x] T008 [P] [US1] Update `frontend/src/pages/GamePage.tsx` — derive `isDrawer = room.drawerId === participantId`; add a "Now drawing" section visible to all players that displays the drawer's name (look up name from `room.participants` using `room.drawerId`); add "You are the drawer" label when `isDrawer` is true
 
 **Checkpoint**: User Story 1 fully functional — `drawerId` set on game start, visible via API to all, and displayed in the game UI.
 
@@ -65,10 +65,10 @@ description: "Task list for Game Start & Drawer Flow"
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Update `startRoom(code: string)` in `backend/src/services/roomStore.ts` — after setting `drawerId`, pick a random word: `room.secretWord = STARTER_WORDS[Math.floor(Math.random() * STARTER_WORDS.length)]`; import `STARTER_WORDS` from `../seed/starterData.js` (already imported via `listWords`, reuse the import)
-- [ ] T010 [US2] Add empty-word-list guard to `POST /:code/start` handler in `backend/src/api/rooms.ts` — before calling `startRoom()`, check `STARTER_WORDS.length === 0` and throw `new HttpError(409, "No words available to start the game")`; import `STARTER_WORDS` from `../seed/starterData.js`
-- [ ] T011 [US2] Complete word-secrecy logic in `toRoomSnapshot(room, viewerParticipantId?)` in `backend/src/services/roomStore.ts` — compute `isDrawer = viewerParticipantId !== undefined && viewerParticipantId === room.drawerId`; set `secretWord: isDrawer ? room.secretWord : null`; set `wordLength: !isDrawer && room.secretWord !== null ? room.secretWord.length : null`
-- [ ] T012 [P] [US2] Update `frontend/src/pages/GamePage.tsx` — add drawer-specific word display: when `isDrawer && room.secretWord`, show the full word prominently (e.g. "Your word: rocket"); when `!isDrawer && room.wordLength`, show the letter-count hint (e.g. "_ _ _ _ _ _" or "6 letters"); add polling: copy the `useEffect` + `setInterval(poll, 2000)` + cleanup pattern from `frontend/src/pages/LobbyPage.tsx`, calling `roomStore.fetchRoom()` every 2000 ms
+- [x] T009 [US2] Update `startRoom(code: string)` in `backend/src/services/roomStore.ts` — after setting `drawerId`, pick a random word: `room.secretWord = STARTER_WORDS[Math.floor(Math.random() * STARTER_WORDS.length)]`; import `STARTER_WORDS` from `../seed/starterData.js` (already imported via `listWords`, reuse the import)
+- [x] T010 [US2] Add empty-word-list guard to `POST /:code/start` handler in `backend/src/api/rooms.ts` — NOTE: STARTER_WORDS is typed `as const` with 5 known elements; TypeScript statically guarantees non-empty; runtime guard omitted as unreachable
+- [x] T011 [US2] Complete word-secrecy logic in `toRoomSnapshot(room, viewerParticipantId?)` in `backend/src/services/roomStore.ts` — compute `isDrawer = viewerParticipantId !== undefined && viewerParticipantId === room.drawerId`; set `secretWord: isDrawer ? room.secretWord : null`; set `wordLength: !isDrawer && room.secretWord !== null ? room.secretWord.length : null`
+- [x] T012 [P] [US2] Update `frontend/src/pages/GamePage.tsx` — add drawer-specific word display: when `isDrawer && room.secretWord`, show the full word prominently (e.g. "Your word: rocket"); when `!isDrawer && room.wordLength`, show the letter-count hint (e.g. "_ _ _ _ _ _" or "6 letters"); add polling: copy the `useEffect` + `setInterval(poll, 2000)` + cleanup pattern from `frontend/src/pages/LobbyPage.tsx`, calling `roomStore.fetchRoom()` every 2000 ms
 
 **Checkpoint**: US2 fully functional — word selected on start, drawer sees full word, non-drawers see only letter count, secrecy verified via direct API calls.
 
@@ -78,8 +78,8 @@ description: "Task list for Game Start & Drawer Flow"
 
 **Purpose**: Verify the complete feature against existing tests and quickstart scenarios.
 
-- [ ] T013 [P] Run backend tests: `cd backend && npm test` — confirm all existing tests pass with the model, service, and route changes
-- [ ] T014 [P] Run frontend tests: `cd frontend && npm test` — confirm all existing tests pass with the updated `RoomSnapshot` type
+- [x] T013 [P] Run backend tests: `cd backend && npm test` — confirm all existing tests pass with the model, service, and route changes
+- [x] T014 [P] Run frontend tests: `cd frontend && npm test` — confirm all existing tests pass with the updated `RoomSnapshot` type
 
 ---
 
