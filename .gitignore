@@ -14,3 +14,4 @@ precheck-results/
 
 .vscode/
 .vite/
+.claude/
