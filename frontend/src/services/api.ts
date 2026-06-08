@@ -9,6 +9,9 @@ export interface Participant {
 export interface RoomSnapshot {
   code: string;
   hostId: string;
+  drawerId: string | null;
+  secretWord: string | null;
+  wordLength: number | null;
   status: "lobby" | "in-progress";
   participants: Participant[];
   availableWords: string[];

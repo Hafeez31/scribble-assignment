@@ -50,6 +50,8 @@ export function createRoom(playerName: string) {
   const room: Room = {
     code: generateUniqueCode(),
     hostId: participant.id,
+    drawerId: null,
+    secretWord: null,
     status: "lobby",
     participants: [participant],
     createdAt: now(),
