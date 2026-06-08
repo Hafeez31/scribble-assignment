@@ -14,6 +14,20 @@ export const startRoomSchema = z.object({
   participantId: z.string()
 });
 
+export const addStrokeSchema = z.object({
+  participantId: z.string(),
+  points: z.array(z.object({ x: z.number(), y: z.number() })).min(1)
+});
+
+export const clearStrokesSchema = z.object({
+  participantId: z.string()
+});
+
+export const submitGuessSchema = z.object({
+  participantId: z.string(),
+  text: z.string().trim().min(1).max(100)
+});
+
 export const roomCodeParamsSchema = z.object({
   code: z.string()
 });

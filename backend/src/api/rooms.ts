@@ -1,13 +1,25 @@
 import { Router } from "express";
 import {
+  addStrokeSchema,
+  clearStrokesSchema,
   createRoomSchema,
   HttpError,
   joinRoomSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
-  startRoomSchema
+  startRoomSchema,
+  submitGuessSchema
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, startRoom, toRoomSnapshot } from "../services/roomStore.js";
+import {
+  addStroke,
+  clearStrokes,
+  createRoom,
+  getRoom,
+  joinRoom,
+  startRoom,
+  submitGuess,
+  toRoomSnapshot
+} from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -86,6 +98,89 @@ export function createRoomsRouter() {
       }
 
       response.json({ room: toRoomSnapshot(startedRoom, participantId) });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/strokes", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, points } = addStrokeSchema.parse(request.body);
+      const upperCode = code.toUpperCase();
+      const room = getRoom(upperCode);
+
+      if (!room) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      if (room.status !== "in-progress") {
+        throw new HttpError(409, "Game is not in progress");
+      }
+
+      if (room.drawerId !== participantId) {
+        throw new HttpError(403, "Only the drawer can add strokes");
+      }
+
+      addStroke(upperCode, points);
+      response.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.delete("/:code/strokes", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = clearStrokesSchema.parse(request.body);
+      const upperCode = code.toUpperCase();
+      const room = getRoom(upperCode);
+
+      if (!room) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      if (room.status !== "in-progress") {
+        throw new HttpError(409, "Game is not in progress");
+      }
+
+      if (room.drawerId !== participantId) {
+        throw new HttpError(403, "Only the drawer can clear the canvas");
+      }
+
+      clearStrokes(upperCode);
+      response.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.post("/:code/guesses", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId, text } = submitGuessSchema.parse(request.body);
+      const upperCode = code.toUpperCase();
+      const room = getRoom(upperCode);
+
+      if (!room) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      if (room.status !== "in-progress") {
+        throw new HttpError(409, "Game is not in progress");
+      }
+
+      if (room.drawerId === participantId) {
+        throw new HttpError(403, "Drawer cannot submit guesses");
+      }
+
+      const result = submitGuess(upperCode, participantId, text);
+
+      if (!result) {
+        throw new HttpError(404, "Room not found");
+      }
+
+      response.json({ correct: result.correct });
     } catch (error) {
       next(error);
     }
