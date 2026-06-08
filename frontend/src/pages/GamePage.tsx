@@ -105,9 +105,11 @@ export function GamePage() {
             </dl>
           </Card>
 
-          <Card title="Your Guess">
-            <GuessForm />
-          </Card>
+          {!isDrawer && (
+            <Card title="Your Guess">
+              <GuessForm />
+            </Card>
+          )}
         </aside>
       </div>
 
